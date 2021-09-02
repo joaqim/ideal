@@ -1,0 +1,5 @@
+FetchContent_GetProperties(imgui-src)
+if(NOT imgui-src_POPULATED)
+  message(STATUS "Fetching ImGui v${IMGUI_VERSION}")
+  FetchContent_Populate(imgui-src)
+endif()
