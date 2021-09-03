@@ -42,11 +42,12 @@ find_package(Magnum REQUIRED
 
 find_package(MagnumPlugins REQUIRED
     TinyGltfImporter
-    StbImageImporter)
+    StbImageImporter
+    AssimpImporter
+    )
 
-find_package(MagnumIntegration REQUIRED
-  ImGui
-  )
+find_package(MagnumIntegration REQUIRED ImGui)
+
 
 find_package(Threads)
 
@@ -73,6 +74,7 @@ target_link_libraries(ideal-deps PUBLIC
     MagnumPlugins::TinyGltfImporter
     MagnumPlugins::StbImageImporter
     MagnumPlugins::StbTrueTypeFont
+    MagnumPlugins::AssimpImporter
     MagnumIntegration::ImGui
     )
 
@@ -94,6 +96,8 @@ target_link_libraries(ideal PRIVATE ideal-deps)
 
 file (GLOB_RECURSE CPP_FILES CONFIGURE_DEPENDS *.cpp)
 file (GLOB_RECURSE H_FILES CONFIGURE_DEPENDS *.h)
+
+list (FILTER CPP_FILES EXCLUDE REGEX ".*(MyApplication|\/modules\/.*)\.cpp$" )
 
 target_sources(ideal PRIVATE "${CPP_FILES}" "${H_FILES}" "${CORRADE_RESOURCES}")
 

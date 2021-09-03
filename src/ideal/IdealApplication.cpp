@@ -1,103 +1,32 @@
-#include "utils/corrade/AbstractModule.h"
-#include "utils/imgui/ImGuiStyle.hpp"
+#include "IdealApplication.h"
 
-#include <Magnum/FileCallback.h>
-#include <Magnum/Text/AbstractFont.h>
-#include <Magnum/Text/DistanceFieldGlyphCache.h>
-#include <Magnum/Text/Renderer.h>
-#include <Magnum/Timeline.h>
-
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/GL/GL.h>
-#include <Magnum/GL/Renderer.h>
-#include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Math/Color.h>
-
-#include <Corrade/Containers/Array.h>
-#include <Corrade/PluginManager/Manager.h>
-#include <Corrade/Utility/Debug.h>
-#include <Corrade/Utility/DebugStl.h>
-#include <Corrade/Utility/Directory.h>
-#include <Corrade/Utility/FileWatcher.h>
-#include <Corrade/Utility/FormatStl.h>
 #include <Corrade/Utility/Resource.h>
 #include <Corrade/Utility/System.h>
+#include <Magnum/FileCallback.h>
+#include <Magnum/GL/DefaultFramebuffer.h>
+#include <Magnum/GL/Renderer.h>
+#include <Magnum/ImGuiIntegration/Context.hpp>
 
 #include <imgui.h>
 
-#ifdef CORRADE_TARGET_ANDROID
-#include <Magnum/Platform/AndroidApplication.h>
-#elif defined(CORRADE_TARGET_EMSCRIPTEN)
-#include <Magnum/Platform/EmscriptenApplication.h>
-#else
-#include <Magnum/Platform/Sdl2Application.h>
-#endif
+namespace Ideal {
 
-namespace Magnum {
-namespace Examples {
-
-using namespace Math::Literals;
-
-class ImGuiExample : public Platform::Application {
-public:
-  explicit ImGuiExample(const Arguments &arguments);
-
-  void drawEvent() override;
-
-  void viewportEvent(ViewportEvent &event) override;
-
-  void keyPressEvent(KeyEvent &event) override;
-  void keyReleaseEvent(KeyEvent &event) override;
-
-  void mousePressEvent(MouseEvent &event) override;
-  void mouseReleaseEvent(MouseEvent &event) override;
-  void mouseMoveEvent(MouseMoveEvent &event) override;
-  void mouseScrollEvent(MouseScrollEvent &event) override;
-  void textInputEvent(TextInputEvent &event) override;
-
-private:
-  ImGuiIntegration::Context _imgui{NoCreate};
-
-  PluginManager::Manager<Text::AbstractFont> _manager;
-  Containers::Pointer<Text::AbstractFont> _font;
-  PluginManager::Manager<AbstractModule> _moduleManager{
-      Corrade::Utility::Directory::path(Corrade::Utility::Directory::current() +
-                                        "/modules/")};
-
-  Text::DistanceFieldGlyphCache _cache;
-
-  Corrade::Utility::FileWatcher _watcher;
-
-  Magnum::Timeline _timeline;
-
-  bool _showDemoWindow = true;
-  bool _showAnotherWindow = false;
-  Color4 _clearColor = 0x72909aff_rgbaf;
-  Float _floatValue = 0.0f;
-};
-
-ImGuiExample::ImGuiExample(const Arguments &arguments)
+IdealApplication::IdealApplication(const Arguments &arguments)
     : Platform::Application{arguments,
                             Configuration{}
                                 .setTitle("Magnum ImGui Example - float")
                                 .setWindowFlags(
                                     Configuration::WindowFlag::Resizable)},
       _cache{Vector2i{2048}, Vector2i{384}, 18},
-      _watcher{Corrade::Utility::Directory::path(
-          Corrade::Utility::Directory::current() +
-          "/modules/ImGuiStyleModule.so")} {
+      _watcher{Directory::path(Directory::current() +
+                               "/modules/ImGuiStyleModule.so")} {
 
   /* Test Module */
-  using namespace Corrade::Utility;
-  /* Set the plugin manager to load plugins from same directory as this app */
-  /* PluginManager::Manager<AbstractModule> manager{
-   * Directory::path(Directory::current() + "/modules/")}; */
   std::unique_ptr<AbstractModule> module;
   /* Copy DLL so that the original can be overwritten with never version */
   Directory::write("modules/ImGuiStyleModule_Runtime.so",
                    Directory::read("modules/ImGuiStyleModule.so"));
   /* First load of the copied plugin */
-
   if (!(_moduleManager.load("ImGuiStyleModule") &
         PluginManager::LoadState::Loaded)) {
     Error{} << "ImGuiStyleModule can not be loaded.";
@@ -108,7 +37,7 @@ ImGuiExample::ImGuiExample(const Arguments &arguments)
   _imgui = ImGuiIntegration::Context(size, windowSize(), framebufferSize());
 
   const float dpiScaleFactor = framebufferSize().x() / size.x();
-  Corrade::Utility::Debug() << "DPI: " << dpiScaleFactor << "\n";
+  Debug() << "DPI: " << dpiScaleFactor << "\n";
   // Utils::ImGui::setImGuiStyle(dpiScaleFactor);
 
   module = _moduleManager.instantiate("ImGuiStyleModule");
@@ -125,9 +54,8 @@ ImGuiExample::ImGuiExample(const Arguments &arguments)
   _font = _manager.loadAndInstantiate("StbTrueTypeFont");
 #if 1
   struct Data {
-    std::unordered_map<
-        std::string,
-        Containers::Array<const char, Utility::Directory::MapDeleter>>
+    std::unordered_map<std::string,
+                       Containers::Array<const char, Directory::MapDeleter>>
         files;
   } data;
 
@@ -146,9 +74,8 @@ ImGuiExample::ImGuiExample(const Arguments &arguments)
 
         /* Load if not there yet */
         if (found == data.files.end())
-          found = data.files
-                      .emplace(filename, Utility::Directory::mapRead(filename))
-                      .first;
+          found =
+              data.files.emplace(filename, Directory::mapRead(filename)).first;
 
         return Containers::arrayView(found->second);
       },
@@ -160,7 +87,7 @@ ImGuiExample::ImGuiExample(const Arguments &arguments)
     Fatal{} << "Cannot open font file";
 #endif
 
-  Corrade::Utility::Debug() << "\tBuilding Glyph Cache\n";
+  Debug() << "\tBuilding Glyph Cache\n";
   /* Glyphs we need to render everything */
   _font->fillGlyphCache(
       _cache, "abcdefghijklmnopqrstuvwxyz"
@@ -168,7 +95,12 @@ ImGuiExample::ImGuiExample(const Arguments &arguments)
       //      "0123456789;:-+,.!? " /* "~$%&[{}(=*)+]#`'<>@^|_" */
   );
 
-  Corrade::Utility::Debug() << "\tFinished loading font\n";
+  _dynamicText.reset(
+      new Text::Renderer2D(*_font, _cache, 32.0f, Text::Alignment::TopRight));
+  _dynamicText->reserve(40, GL::BufferUsage::DynamicDraw,
+                        GL::BufferUsage::StaticDraw);
+
+  Debug() << "\tFinished loading font\n";
 
   ImFontConfig fontConfig;
   fontConfig.FontDataOwnedByAtlas = false;
@@ -210,11 +142,11 @@ ImGuiExample::ImGuiExample(const Arguments &arguments)
   _timeline.start();
 }
 
-void ImGuiExample::drawEvent() {
+void IdealApplication::drawEvent() {
 
   std::unique_ptr<AbstractModule> module;
   if (_watcher.hasChanged()) {
-    /* Corrade::Utility::System::sleep(1000); */
+    /* ::System::sleep(1000); */
     /* Tell module that it is being unloaded and retrieve its state for
      * state transfer, if supported. */
     // auto state{module->unload(false)};
@@ -226,10 +158,9 @@ void ImGuiExample::drawEvent() {
       Error{} << "ImGuiStyleModule failed to unload.";
     }
 
-    Corrade::Utility::Directory::write(
-        "modules/ImGuiStyleModule_Runtime.so",
-        Corrade::Utility::Directory::read("modules/ImGuiStyleModule.so"));
-    Corrade::Utility::System::sleep(500);
+    Directory::write("modules/ImGuiStyleModule_Runtime.so",
+                     Directory::read("modules/ImGuiStyleModule.so"));
+    System::sleep(500);
 
     if (!(_moduleManager.load("ImGuiStyleModule") &
           PluginManager::LoadState::Loaded)) {
@@ -302,44 +233,50 @@ a window called "Debug" automatically */
   GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
   GL::Renderer::disable(GL::Renderer::Feature::Blending);
 
+  _shader.bindVectorTexture(_cache.texture());
+  _shader.setColor(0xffffff_rgbf)
+      .setOutlineRange(0.5f, 1.0f)
+      .setSmoothness(0.075f)
+      .draw(_dynamicText->mesh());
+
   swapBuffers();
   redraw();
   _timeline.nextFrame();
 }
 
-void ImGuiExample::viewportEvent(ViewportEvent &event) {
+void IdealApplication::viewportEvent(ViewportEvent &event) {
   GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
 
   _imgui.relayout(Vector2{event.windowSize()} / event.dpiScaling(),
                   event.windowSize(), event.framebufferSize());
 }
 
-void ImGuiExample::keyPressEvent(KeyEvent &event) {
+void IdealApplication::keyPressEvent(KeyEvent &event) {
   if (_imgui.handleKeyPressEvent(event))
     return;
 }
 
-void ImGuiExample::keyReleaseEvent(KeyEvent &event) {
+void IdealApplication::keyReleaseEvent(KeyEvent &event) {
   if (_imgui.handleKeyReleaseEvent(event))
     return;
 }
 
-void ImGuiExample::mousePressEvent(MouseEvent &event) {
+void IdealApplication::mousePressEvent(MouseEvent &event) {
   if (_imgui.handleMousePressEvent(event))
     return;
 }
 
-void ImGuiExample::mouseReleaseEvent(MouseEvent &event) {
+void IdealApplication::mouseReleaseEvent(MouseEvent &event) {
   if (_imgui.handleMouseReleaseEvent(event))
     return;
 }
 
-void ImGuiExample::mouseMoveEvent(MouseMoveEvent &event) {
+void IdealApplication::mouseMoveEvent(MouseMoveEvent &event) {
   if (_imgui.handleMouseMoveEvent(event))
     return;
 }
 
-void ImGuiExample::mouseScrollEvent(MouseScrollEvent &event) {
+void IdealApplication::mouseScrollEvent(MouseScrollEvent &event) {
   if (_imgui.handleMouseScrollEvent(event)) {
     /* Prevent scrolling the page */
     event.setAccepted();
@@ -347,12 +284,10 @@ void ImGuiExample::mouseScrollEvent(MouseScrollEvent &event) {
   }
 }
 
-void ImGuiExample::textInputEvent(TextInputEvent &event) {
+void IdealApplication::textInputEvent(TextInputEvent &event) {
   if (_imgui.handleTextInputEvent(event))
     return;
 }
+} // namespace Ideal
 
-} // namespace Examples
-} // namespace Magnum
-
-MAGNUM_APPLICATION_MAIN(Magnum::Examples::ImGuiExample)
+MAGNUM_APPLICATION_MAIN(Ideal::IdealApplication)

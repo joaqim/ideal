@@ -199,6 +199,10 @@ FetchContent_Declare(
 
 add_subdirectory(imgui EXCLUDE_FROM_ALL)
 
+# Assimp, required by Magnum::Trade::AssimpImporter 
+
+add_subdirectory(assimp EXCLUDE_FROM_ALL)
+
 # Magnum
 
 FetchContent_Declare(
@@ -211,6 +215,7 @@ set(BUILD_PLUGINS_STATIC  ON  CACHE BOOL "" FORCE)
 set(WITH_SDL2APPLICATION  ON  CACHE BOOL "" FORCE)
 set(WITH_ANYIMAGEIMPORTER ON  CACHE BOOL "" FORCE)
 set(WITH_TESTSUITE        OFF CACHE BOOL "" FORCE)
+set(WITH_ANYIMAGEIMPORTER ON  CACHE BOOL "" FORCE)
 #FetchContent_MakeAvailable(magnum)
 FetchContent_GetProperties(magnum)
 if(NOT magnum_POPULATED)
@@ -219,7 +224,6 @@ if(NOT magnum_POPULATED)
 endif()
 
 # Magnum Plugins
-
 
 FetchContent_Declare(
   magnum-plugins
@@ -230,6 +234,7 @@ FetchContent_Declare(
 set(WITH_STBTRUETYPEFONT ON CACHE BOOL "" FORCE)
 set(WITH_TINYGLTFIMPORTER ON CACHE BOOL "" FORCE)
 set(WITH_STBIMAGEIMPORTER ON CACHE BOOL "" FORCE)
+set(WITH_ASSIMPIMPORTER ON CACHE BOOL "" FORCE)
 
 FetchContent_GetProperties(magnum-plugins)
 if(NOT magnum-plugins_POPULATED)
