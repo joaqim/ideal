@@ -55,6 +55,8 @@ private:
       Directory::path(Directory::current() +
                                         "/modules/")};
 
+  Matrix3 _transformationProjection;
+
   Shaders::DistanceFieldVector2D _shader;
   Containers::Pointer<Text::Renderer2D> _dynamicText;
   Text::DistanceFieldGlyphCache _cache;

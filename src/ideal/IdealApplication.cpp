@@ -82,16 +82,16 @@ IdealApplication::IdealApplication(const Arguments &arguments)
       data);
 
   //_font->openFile("assets/fonts.conf", 18.f);
-  /* #else */
-  if (!_font || !_font->openData(font, font_size))
-    Fatal{} << "Cannot open font file";
 #endif
+  if (!_font || !_font->openData(font, font_size * 10.f))
+    Fatal{} << "Cannot open font file";
 
   Debug() << "\tBuilding Glyph Cache\n";
   /* Glyphs we need to render everything */
   _font->fillGlyphCache(
       _cache, "abcdefghijklmnopqrstuvwxyz"
               "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+              " ."
       //      "0123456789;:-+,.!? " /* "~$%&[{}(=*)+]#`'<>@^|_" */
   );
 
@@ -99,8 +99,12 @@ IdealApplication::IdealApplication(const Arguments &arguments)
       new Text::Renderer2D(*_font, _cache, 32.0f, Text::Alignment::TopRight));
   _dynamicText->reserve(40, GL::BufferUsage::DynamicDraw,
                         GL::BufferUsage::StaticDraw);
+  _dynamicText->render("This is the text rendered with Magnum");
 
   Debug() << "\tFinished loading font\n";
+
+  _transformationProjection =
+      Matrix3::projection(size) * Matrix3::translation(size * 0.5f);
 
   ImFontConfig fontConfig;
   fontConfig.FontDataOwnedByAtlas = false;
@@ -116,7 +120,7 @@ IdealApplication::IdealApplication(const Arguments &arguments)
   GL::Renderer::setBlendFunction(
       GL::Renderer::BlendFunction::SourceAlpha,
       GL::Renderer::BlendFunction::OneMinusSourceAlpha);
-#else
+#elif 1
 
   GL::Renderer::enable(GL::Renderer::Feature::Blending);
   GL::Renderer::enable(GL::Renderer::Feature::ScissorTest);
@@ -125,15 +129,16 @@ IdealApplication::IdealApplication(const Arguments &arguments)
   GL::Renderer::setBlendFunction(
       GL::Renderer::BlendFunction::SourceAlpha,
       GL::Renderer::BlendFunction::OneMinusSourceAlpha);
-#endif
-
+#else
   /* Set up premultiplied alpha blending to avoid overlapping text characters
      to cut into each other */
-  /* GL::Renderer::enable(GL::Renderer::Feature::Blending); */
-  /* GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::One,
-   * GL::Renderer::BlendFunction::OneMinusSourceAlpha); */
-  /* GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add,
-   * GL::Renderer::BlendEquation::Add); */
+  GL::Renderer::enable(GL::Renderer::Feature::Blending);
+  GL::Renderer::setBlendFunction(
+      GL::Renderer::BlendFunction::One,
+      GL::Renderer::BlendFunction::OneMinusSourceAlpha);
+  GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add,
+                                 GL::Renderer::BlendEquation::Add);
+#endif
 
 #if !defined(MAGNUM_TARGET_WEBGL) && !defined(CORRADE_TARGET_ANDROID)
   /* Have some sane speed, please */
@@ -173,6 +178,7 @@ void IdealApplication::drawEvent() {
   }
 
   GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
+#if 1
 
   _imgui.newFrame();
 
@@ -224,20 +230,25 @@ a window called "Debug" automatically */
   GL::Renderer::disable(GL::Renderer::Feature::FaceCulling);
   GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
 
-  _imgui.drawFrame();
+  /* _imgui.drawFrame(); */
 
   /* Reset state. Only needed if you want to draw something else with
      different state after. */
-  GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
-  GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
-  GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
-  GL::Renderer::disable(GL::Renderer::Feature::Blending);
+  /* GL::Renderer::enable(GL::Renderer::Feature::DepthTest); */
+  /* GL::Renderer::enable(GL::Renderer::Feature::FaceCulling); */
+  /* GL::Renderer::disable(GL::Renderer::Feature::ScissorTest); */
+  /* GL::Renderer::disable(GL::Renderer::Feature::Blending); */
+
+#endif
 
   _shader.bindVectorTexture(_cache.texture());
   _shader.setColor(0xffffff_rgbf)
+      .setTransformationProjectionMatrix(_transformationProjection)
       .setOutlineRange(0.5f, 1.0f)
       .setSmoothness(0.075f)
       .draw(_dynamicText->mesh());
+
+  _imgui.drawFrame();
 
   swapBuffers();
   redraw();
@@ -249,6 +260,9 @@ void IdealApplication::viewportEvent(ViewportEvent &event) {
 
   _imgui.relayout(Vector2{event.windowSize()} / event.dpiScaling(),
                   event.windowSize(), event.framebufferSize());
+  _transformationProjection =
+      Matrix3::projection(Vector2{windowSize()}) *
+      Matrix3::translation(Vector2{windowSize()} * 0.5f);
 }
 
 void IdealApplication::keyPressEvent(KeyEvent &event) {
