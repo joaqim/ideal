@@ -17,7 +17,7 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 # Modules
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 corrade_add_plugin(TestModule ${CMAKE_CURRENT_BINARY_DIR} "" "" TestModule.cpp)
 set_target_properties(TestModule PROPERTIES COMPILE_FLAGS "-Wno-return-local-addr")
 target_link_libraries(TestModule Corrade::PluginManager Corrade::Utility)
@@ -140,7 +140,7 @@ source_group("Shader Files" FILES ${SHADER_FILES})
 source_group("Header Files" FILES ${H_FILES})
 
 # Put executable in the bin folder
-set_target_properties(ideal PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+#set_target_properties(ideal PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set_target_properties(ideal PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
 
 # Copy src/assets to build/assets
@@ -149,6 +149,12 @@ file(GLOB MODULE_CONF_LIST CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/modules/*.
 foreach(MODULE_CONF IN LISTS MODULE_CONF_LIST)
   file(COPY "${MODULE_CONF}" DESTINATION "${CMAKE_BINARY_DIR}/modules/")
 endforeach()
+
+
+
+message(${CMAKE_INSTALL_PREFIX})
+#install(TARGETS ideal RUNTIME DESTINATION bin)
+#install(TARGETS ideal DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
 # add_executable(MyApplication
 #   MyApplication.cpp
