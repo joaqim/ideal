@@ -60,8 +60,8 @@ set(SDL_EVENTS ON CACHE BOOL "" FORCE)
 # This assumes you want to have SDL as a static library. If not, set SDL_STATIC
 # to OFF instead.
 set(SDL_DLOPEN ON CACHE BOOL "" FORCE)
-set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-set(SDL_STATIC ON CACHE BOOL "" FORCE)
+set(SDL_SHARED ON CACHE BOOL "" FORCE)
+set(SDL_STATIC OFF CACHE BOOL "" FORCE)
 
 #ADD_SUBDIRECTORY(SDL2 EXCLUDE_FROM_ALL)
 fetchcontent_declare(

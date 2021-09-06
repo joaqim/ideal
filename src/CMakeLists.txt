@@ -121,7 +121,7 @@ target_include_directories(ideal PRIVATE .)
 # MSVC quality of life improvements for Visual Studio
 
 # Set the MSVC debug working directory
-set_property(TARGET ideal PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ../../bin)
+set_property(TARGET ideal PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Enforce conformance mode for ideal
 target_compile_options(ideal PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/permissive->)
@@ -131,7 +131,7 @@ source_group("Shader Files" FILES ${SHADER_FILES})
 source_group("Header Files" FILES ${H_FILES})
 
 # Put executable in the bin folder
-set_target_properties(ideal PROPERTIES RUNTIME_OUTPUT_DIRECTORY ../bin)
+set_target_properties(ideal PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set_target_properties(ideal PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
 
 # Copy src/assets to build/assets
