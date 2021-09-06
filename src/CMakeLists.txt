@@ -95,11 +95,12 @@ add_executable(ideal)
 target_link_libraries(ideal PRIVATE ideal-deps)
 
 file (GLOB_RECURSE CPP_FILES CONFIGURE_DEPENDS *.cpp)
+file (GLOB_RECURSE HPP_FILES CONFIGURE_DEPENDS *.hpp)
 file (GLOB_RECURSE H_FILES CONFIGURE_DEPENDS *.h)
 
 list (FILTER CPP_FILES EXCLUDE REGEX ".*(MyApplication|\/modules\/.*)\.cpp$" )
 
-target_sources(ideal PRIVATE "${CPP_FILES}" "${H_FILES}" "${CORRADE_RESOURCES}")
+target_sources(ideal PRIVATE "${CPP_FILES}" "${HPP_FILES}" "${H_FILES}" "${CORRADE_RESOURCES}")
 
 # For some reason, source_group() requires all files to be added to the executable
 set(SHADERS_DIR "${CMAKE_SOURCE_DIR}/src/assets/shaders")

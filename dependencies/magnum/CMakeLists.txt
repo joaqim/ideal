@@ -1,0 +1,12 @@
+set(BUILD_PLUGINS_STATIC ON CACHE BOOL "" FORCE)
+set(WITH_SDL2APPLICATION ON CACHE BOOL "" FORCE)
+set(WITH_ANYIMAGEIMPORTER ON CACHE BOOL "" FORCE)
+set(WITH_TESTSUITE OFF CACHE BOOL "" FORCE)
+
+#FetchContent_MakeAvailable(magnum)
+fetchcontent_getproperties(magnum)
+if(NOT magnum_POPULATED)
+  message(STATUS "Fetching Magnum ${MAGNUM_TAG}")
+  fetchcontent_populate(magnum)
+  add_subdirectory(${magnum_SOURCE_DIR} ${magnum_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
