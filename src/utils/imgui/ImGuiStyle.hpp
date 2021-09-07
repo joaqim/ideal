@@ -55,7 +55,7 @@ inline void setImGuiStyle(float highDPIscaleFactor) {
       ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
 
   style.WindowPadding = ImVec2(8, 6);
-  style.WindowRounding = 0.0f;
+  style.WindowRounding = 1.0f;
   style.FramePadding = ImVec2(5, 7);
   style.FrameRounding = 2.4f;
   style.ItemSpacing = ImVec2(5, 5);
@@ -66,9 +66,9 @@ inline void setImGuiStyle(float highDPIscaleFactor) {
   style.ScrollbarSize = 16.0f;
   style.ScrollbarRounding = 2.4f;
   // style.GrabMinSize              = 20.0f;
-  // style.GrabRounding             = 2.0f;
-  // style.WindowTitleAlign.x = 0.50f;
-  // style.FrameBorderSize = 0.0f;
+  /* style.GrabRounding             = 2.0f; */
+   /* style.WindowTitleAlign.x = 0.50f; */
+  /* style.FrameBorderSize = 0.0f; */
   // style.WindowBorderSize = 1.0f;
 
   style.ScaleAllSizes(highDPIscaleFactor);

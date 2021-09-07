@@ -115,13 +115,13 @@ add_subdirectory(imgui EXCLUDE_FROM_ALL)
 
 # Assimp, required by Magnum::Trade::AssimpImporter
 
-fetchcontent_declare(
-  assimp
-  GIT_REPOSITORY https://github.com/assimp/assimp
-  GIT_TAG 8f0c6b04b2257a520aaab38421b2e090204b69df # v5.0.1
-)
-
-add_subdirectory(assimp EXCLUDE_FROM_ALL)
+# fetchcontent_declare(
+#   assimp
+#   GIT_REPOSITORY https://github.com/assimp/assimp
+#   GIT_TAG 8f0c6b04b2257a520aaab38421b2e090204b69df # v5.0.1
+# )
+# 
+# add_subdirectory(assimp EXCLUDE_FROM_ALL)
 
 # Corrade
 

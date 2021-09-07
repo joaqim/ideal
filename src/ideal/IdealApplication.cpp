@@ -19,13 +19,13 @@ IdealApplication::IdealApplication(const Arguments &arguments)
                                     Configuration::WindowFlag::Resizable)},
       _cache{Vector2i{2048}, Vector2i{384}, 18},
       _watcher{Directory::path(Directory::current() +
-                               "/modules/ImGuiStyleModule.so")} {
+                               "/lib/ImGuiStyleModule.so")} {
 
   /* Test Module */
   std::unique_ptr<AbstractModule> module;
   /* Copy DLL so that the original can be overwritten with never version */
-  Directory::write("modules/ImGuiStyleModule_Runtime.so",
-                   Directory::read("modules/ImGuiStyleModule.so"));
+  Directory::write("lib/ImGuiStyleModule_Runtime.so",
+                   Directory::read("lib/ImGuiStyleModule.so"));
   /* First load of the copied plugin */
   if (!(_moduleManager.load("ImGuiStyleModule") &
         PluginManager::LoadState::Loaded)) {
@@ -40,9 +40,9 @@ IdealApplication::IdealApplication(const Arguments &arguments)
   Debug() << "DPI: " << dpiScaleFactor << "\n";
   // Utils::ImGui::setImGuiStyle(dpiScaleFactor);
 
-  module = _moduleManager.instantiate("ImGuiStyleModule");
-  module->load();
-  /* module->unload(); */
+  _module = _moduleManager.instantiate("ImGuiStyleModule");
+  _module->load();
+  //module->unload();
 
   Utility::Resource rs{"assets"};
   Containers::ArrayView<const char> font =
@@ -149,22 +149,22 @@ IdealApplication::IdealApplication(const Arguments &arguments)
 
 void IdealApplication::drawEvent() {
 
-  std::unique_ptr<AbstractModule> module;
   if (_watcher.hasChanged()) {
     /* ::System::sleep(1000); */
     /* Tell module that it is being unloaded and retrieve its state for
      * state transfer, if supported. */
     // auto state{module->unload(false)};
+    _module->unload();
     /* Remove references to the plugin, otherwise we cannot unload it */
-    module.reset(nullptr);
+    _module.reset(nullptr);
 
     if (_moduleManager.unload("ImGuiStyleModule") &
         PluginManager::LoadState::UnloadFailed) {
       Error{} << "ImGuiStyleModule failed to unload.";
     }
 
-    Directory::write("modules/ImGuiStyleModule_Runtime.so",
-                     Directory::read("modules/ImGuiStyleModule.so"));
+    Directory::write("lib/ImGuiStyleModule_Runtime.so",
+                     Directory::read("lib/ImGuiStyleModule.so"));
     System::sleep(500);
 
     if (!(_moduleManager.load("ImGuiStyleModule") &
@@ -172,8 +172,8 @@ void IdealApplication::drawEvent() {
       Error{} << "ImGuiStyleModule can not be loaded.";
     }
 
-    module = _moduleManager.instantiate("ImGuiStyleModule");
-    module->load();
+    _module = _moduleManager.instantiate("ImGuiStyleModule");
+    _module->load();
     // module->load(std::move(state));
   }
 

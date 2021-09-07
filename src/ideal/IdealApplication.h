@@ -52,8 +52,9 @@ private:
   PluginManager::Manager<Text::AbstractFont> _manager;
   Containers::Pointer<Text::AbstractFont> _font;
   PluginManager::Manager<AbstractModule> _moduleManager{
-      Directory::path(Directory::current() +
-                                        "/modules/")};
+      Directory::path(Directory::current() + "/lib/")};
+
+  std::unique_ptr<AbstractModule> _module;
 
   Matrix3 _transformationProjection;
 

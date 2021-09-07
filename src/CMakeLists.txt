@@ -17,7 +17,7 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 # Modules
 
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
+
 corrade_add_plugin(TestModule ${CMAKE_CURRENT_BINARY_DIR} "" "" TestModule.cpp)
 set_target_properties(TestModule PROPERTIES COMPILE_FLAGS "-Wno-return-local-addr")
 target_link_libraries(TestModule Corrade::PluginManager Corrade::Utility)
@@ -45,7 +45,6 @@ find_package(
   MagnumPlugins REQUIRED
   TinyGltfImporter
   StbImageImporter
-  # AssimpImporter
 )
 
 find_package(MagnumIntegration REQUIRED ImGui)
@@ -56,12 +55,8 @@ find_package(Threads)
 add_library(ideal-deps STATIC)
 target_sources(ideal-deps PRIVATE static_library_dummy_file.cpp)
 
-find_package(Assimp REQUIRED)
-# add_dependencies(ideal Assimp::Assimp)#//MagnumPlugins::AssimpImporter)
-
 target_link_libraries(
   ideal-deps PUBLIC
-  Assimp::Assimp
   ${CMAKE_THREAD_LIBS_INIT}
   EnTT::EnTT
   Corrade::Main
@@ -81,7 +76,6 @@ target_link_libraries(
   MagnumPlugins::TinyGltfImporter
   MagnumPlugins::StbImageImporter
   MagnumPlugins::StbTrueTypeFont
-  # MagnumPlugins::AssimpImporter
   MagnumIntegration::ImGui
 )
 
@@ -107,6 +101,7 @@ file(GLOB_RECURSE HPP_FILES CONFIGURE_DEPENDS *.hpp)
 file(GLOB_RECURSE H_FILES CONFIGURE_DEPENDS *.h)
 
 list(FILTER CPP_FILES EXCLUDE REGEX ".*(MyApplication|\/modules\/.*)\.cpp$")
+list(FILTER HPP_FILES EXCLUDE REGEX ".*(ImGuiStyle)\.hpp$")
 
 target_sources(ideal PRIVATE "${CPP_FILES}" "${HPP_FILES}" "${H_FILES}" "${CORRADE_RESOURCES}")
 
@@ -143,18 +138,16 @@ source_group("Header Files" FILES ${H_FILES})
 #set_target_properties(ideal PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set_target_properties(ideal PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
 
-# Copy src/assets to build/assets
-#FILE (COPY assets/ DESTINATION "${CMAKE_BINARY_DIR}/assets/")
-file(GLOB MODULE_CONF_LIST CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/modules/*.conf")
-foreach(MODULE_CONF IN LISTS MODULE_CONF_LIST)
-  file(COPY "${MODULE_CONF}" DESTINATION "${CMAKE_BINARY_DIR}/modules/")
-endforeach()
+# Copy src/modules/*.conf to build/lib/
+add_custom_command(
+  TARGET ideal 
+  POST_BUILD COMMAND 
+  ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_SOURCE_DIR}/src/modules/*.conf 
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
-
-
-message(${CMAKE_INSTALL_PREFIX})
 #install(TARGETS ideal RUNTIME DESTINATION bin)
-#install(TARGETS ideal DESTINATION ${CMAKE_BINARY_DIR}/bin)
+install(TARGETS ideal DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
 # add_executable(MyApplication
 #   MyApplication.cpp
