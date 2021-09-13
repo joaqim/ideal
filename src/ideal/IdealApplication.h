@@ -1,6 +1,7 @@
 #pragma once
+#include <ideal/HotModuleLoader.h>
+#include "utils/corrade/AbstractModule.h"
 #include "../Types.h"
-#include "../utils/corrade/AbstractModule.h"
 
 #include <Corrade/PluginManager/Manager.h>
 #include <Corrade/Utility/Directory.h>
@@ -55,6 +56,8 @@ private:
       Directory::path(Directory::current() + "/lib/")};
 
   std::unique_ptr<AbstractModule> _module;
+
+  HotModuleLoader _moduleLoader;
 
   Matrix3 _transformationProjection;
 

@@ -14,23 +14,25 @@ namespace Ideal {
 IdealApplication::IdealApplication(const Arguments &arguments)
     : Platform::Application{arguments,
                             Configuration{}
-                                .setTitle("Magnum ImGui Example - float")
+                                .setTitle("Magnum ImGui Example")
                                 .setWindowFlags(
                                     Configuration::WindowFlag::Resizable)},
       _cache{Vector2i{2048}, Vector2i{384}, 18},
       _watcher{Directory::path(Directory::current() +
                                "/lib/ImGuiStyleModule.so")} {
 
+  Directory::write("lib/ImGuiStyleModule_Runtime.so", Directory::read("lib/ImGuiStyleModule.so"));
+#if 0
   /* Test Module */
   std::unique_ptr<AbstractModule> module;
   /* Copy DLL so that the original can be overwritten with never version */
-  Directory::write("lib/ImGuiStyleModule_Runtime.so",
-                   Directory::read("lib/ImGuiStyleModule.so"));
+  Directory::write("lib/ImGuiStyleModule_Runtime.so", Directory::read("lib/ImGuiStyleModule.so"));
   /* First load of the copied plugin */
   if (!(_moduleManager.load("ImGuiStyleModule") &
         PluginManager::LoadState::Loaded)) {
     Error{} << "ImGuiStyleModule can not be loaded.";
   }
+#endif
 
   const auto size = Vector2{windowSize()} / dpiScaling();
 
@@ -39,9 +41,13 @@ IdealApplication::IdealApplication(const Arguments &arguments)
   const float dpiScaleFactor = framebufferSize().x() / size.x();
   Debug() << "DPI: " << dpiScaleFactor << "\n";
   // Utils::ImGui::setImGuiStyle(dpiScaleFactor);
+ 
+  _moduleLoader.load("ImGuiStyleModule_Runtime");
+  /* _moduleLoader.load("ImGuiStyleModule"); */
+  //_moduleLoader.unload("ImGuiStyleModule");
 
-  _module = _moduleManager.instantiate("ImGuiStyleModule");
-  _module->load();
+  //_module = _moduleManager.instantiate("ImGuiStyleModule");
+  //_module->load();
   //module->unload();
 
   Utility::Resource rs{"assets"};
@@ -149,7 +155,10 @@ IdealApplication::IdealApplication(const Arguments &arguments)
 
 void IdealApplication::drawEvent() {
 
+  _moduleLoader.update();
+
   if (_watcher.hasChanged()) {
+#if 0
     /* ::System::sleep(1000); */
     /* Tell module that it is being unloaded and retrieve its state for
      * state transfer, if supported. */
@@ -175,6 +184,7 @@ void IdealApplication::drawEvent() {
     _module = _moduleManager.instantiate("ImGuiStyleModule");
     _module->load();
     // module->load(std::move(state));
+#endif
   }
 
   GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);

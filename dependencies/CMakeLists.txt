@@ -167,4 +167,19 @@ fetchcontent_declare(
 
 add_subdirectory(magnum-integration)
 
+fetchcontent_declare(
+  efsw
+  GIT_REPOSITORY https://github.com/joaqim/efsw
+  GIT_TAG 4e6f9fe2737393304bf7503f06875eddd1ed93c3
+  )
+
+#FetchContent_GetProperties(efsw)
+#if(NOT efsw_POPULATED)
+#FetchContent_Populate(efsw)
+#endif()
+
+FetchContent_MakeAvailable(efsw) 
+set_target_properties(efsw PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${efsw_SOURCE_DIR}/include")
+
+
 message(STATUS "Fetching thirdparty libraries done")

@@ -77,6 +77,7 @@ target_link_libraries(
   MagnumPlugins::StbImageImporter
   MagnumPlugins::StbTrueTypeFont
   MagnumIntegration::ImGui
+  efsw
 )
 
 set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/src/assets")
