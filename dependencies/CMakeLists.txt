@@ -1,7 +1,7 @@
 include(FetchContent)
 
 option(USE_SYSTEM_DEPS CACHE OFF)
-option(LINK_DEPS_STATIC CACHE OFF)
+option(LINK_DEPS_STATIC CACHE ON)
 option(OpenGL_GL_PREFERENCE "GLVND")
 
 # Don't build shared libs if we want to link to deps statically
@@ -170,16 +170,19 @@ add_subdirectory(magnum-integration)
 fetchcontent_declare(
   efsw
   GIT_REPOSITORY https://github.com/joaqim/efsw
-  GIT_TAG 4e6f9fe2737393304bf7503f06875eddd1ed93c3
   )
 
-#FetchContent_GetProperties(efsw)
-#if(NOT efsw_POPULATED)
-#FetchContent_Populate(efsw)
-#endif()
+add_subdirectory(efsw)
 
-FetchContent_MakeAvailable(efsw) 
-set_target_properties(efsw PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${efsw_SOURCE_DIR}/include")
-
+# 
+#   set(EFSW_STATIC_LIB TRUE)
+# 
+#   #FetchContent_GetProperties(efsw)
+#   #if(NOT efsw_POPULATED)
+#   #FetchContent_Populate(efsw)
+#   #endif()
+# FetchContent_MakeAvailable(efsw) 
+# set_target_properties(efsw PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${efsw_SOURCE_DIR}/include")
+# 
 
 message(STATUS "Fetching thirdparty libraries done")

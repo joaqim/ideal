@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-BUILD_TYPE=Debug
+BUILD_TYPE=${1:-Debug}
 [ -d build ] || mkdir build
 set -e
 cd build && cmake .. -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE && ninja

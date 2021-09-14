@@ -51,4 +51,4 @@ private:
   std::unique_ptr<ImGuiStyleState> _state;
 };
 
-CORRADE_PLUGIN_REGISTER(ImGuiStyleModule, ImGuiStyleModule, MODULE_PLUGIN_ID);
+CORRADE_PLUGIN_REGISTER(ImGuiStyleModule, ImGuiStyleModule, MODULE_PLUGIN_ID)

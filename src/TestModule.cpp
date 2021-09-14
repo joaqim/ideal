@@ -82,4 +82,4 @@ class TestModule: public AbstractModule {
         std::unique_ptr<TestModuleState> _state;
 };
 
-CORRADE_PLUGIN_REGISTER(TestModule, TestModule, MODULE_PLUGIN_ID);
+CORRADE_PLUGIN_REGISTER(TestModule, TestModule, MODULE_PLUGIN_ID)
