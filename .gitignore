@@ -2,3 +2,6 @@
 build*/
 *.kdev4
 *~
+*.7z
+*.tar.gz
+*.zip
