@@ -38,7 +38,7 @@ namespace Ideal {
       bool reload(const char *moduleName = "");
       bool update();
     private:
-      Corrade::PluginManager::Manager<AbstractModule> _moduleManager{Directory::path(Directory::current()+"/lib/")};
+      Corrade::PluginManager::Manager<AbstractModule> _moduleManager;
       std::map<std::string, std::unique_ptr<AbstractModule>> _mpModules;
       /* std::map<std::string, std::pair<FileWatcher,std::unique_ptr<AbstractModule>>> _mpModules; */
 

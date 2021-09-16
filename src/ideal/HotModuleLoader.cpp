@@ -2,13 +2,19 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FileWatcher.h"
 
 #include <cstring>
 #include <chrono> // milliseconds
 #include <thread> // this_thread::sleep_for
+#include <filesystem>
 
 namespace Ideal {
+
+  std::string getLibraryDir(){ /* TODO: Make cleaner */
+    return std::filesystem::path(Directory::executableLocation()).parent_path().append("../lib");
+  }
 
 impl::UpdateListener::UpdateListener(AbstractModuleLoader *moduleLoader)
     : _pModuleLoader{moduleLoader}, _moveCount{0} {}
@@ -50,7 +56,8 @@ void impl::UpdateListener::handleFileAction(efsw::WatchID watchid,
 using namespace Corrade;
 using namespace Corrade::Utility;
 
-HotModuleLoader::HotModuleLoader() : _updateListener{this} {};
+HotModuleLoader::HotModuleLoader() :  _moduleManager{getLibraryDir()},_updateListener{this} {};
+  
 HotModuleLoader::~HotModuleLoader() {
   for(auto const &watcher : _mWatchIDs) {
     unload(watcher.first.c_str());
@@ -70,7 +77,8 @@ bool HotModuleLoader::load(const char *moduleName) {
 #if 0
       Directory::path(Directory::current() + "/lib/" + moduleName + ".so").c_str(),
 #else
-      Directory::path(Directory::current() + "/lib/").c_str(),
+      /* Directory::path(Directory::current() + "/lib/").c_str(), */
+       getLibraryDir().c_str(),
 #endif
       &_updateListener,
       false);

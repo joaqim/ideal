@@ -1,4 +1,5 @@
 #include "IdealApplication.h"
+#include "Corrade/Utility/Directory.h"
 
 #include <Corrade/Utility/Resource.h>
 #include <Corrade/Utility/System.h>
@@ -9,7 +10,20 @@
 
 #include <imgui.h>
 
+#include <filesystem>
+
 namespace Ideal {
+/*  */
+/*   std::string getLibraryDir(){ */
+/*     auto currentDir = Directory::current(); */
+/*     //if(Directory::exists(Directory::path(currentDir + "./lib"))) { */
+/*     if(Directory::exists("./lib")) { */
+/*       //return currentDir + "/lib/"; */
+/*       return "./lib/"; */
+/*     } */
+/*     return "../lib/"; */
+/*     //return std::filesystem::path(currentDir).remove_filename().append("../lib/").string(); */
+/* } */
 
 IdealApplication::IdealApplication(const Arguments &arguments)
     : Platform::Application{arguments,
@@ -17,11 +31,13 @@ IdealApplication::IdealApplication(const Arguments &arguments)
                                 .setTitle("Magnum ImGui Example")
                                 .setWindowFlags(
                                     Configuration::WindowFlag::Resizable)},
-      _cache{Vector2i{2048}, Vector2i{384}, 18},
-      _watcher{Directory::path(Directory::current() +
-                               "/lib/ImGuiStyleModule.so")} {
+      _cache{Vector2i{2048}, Vector2i{384}, 18} {
+      /* _watcher{Directory::path(getLibraryDir() + */
+                               /* "ImGuiStyleModule.so")} { */
 
-  Directory::write("lib/ImGuiStyleModule_Runtime.so", Directory::read("lib/ImGuiStyleModule.so"));
+  /* const auto libDir = getLibraryDir(); */
+  /* Debug{} << "LibDir:" << libDir.c_str(); */
+  /* Directory::write(libDir+"ImGuiStyleModule_Runtime.so", Directory::read(libDir+"ImGuiStyleModule.so")); */
 #if 0
   /* Test Module */
   std::unique_ptr<AbstractModule> module;
@@ -157,8 +173,8 @@ void IdealApplication::drawEvent() {
 
   _moduleLoader.update();
 
-  if (_watcher.hasChanged()) {
 #if 0
+  if (_watcher.hasChanged()) {
     /* ::System::sleep(1000); */
     /* Tell module that it is being unloaded and retrieve its state for
      * state transfer, if supported. */
@@ -184,8 +200,8 @@ void IdealApplication::drawEvent() {
     _module = _moduleManager.instantiate("ImGuiStyleModule");
     _module->load();
     // module->load(std::move(state));
-#endif
   }
+#endif
 
   GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
 #if 1

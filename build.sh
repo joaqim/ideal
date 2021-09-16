@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 BUILD_TYPE=${1:-Debug}
 if [ "${BUILD_TYPE}" == "run" ]; then
   BUILD_TYPE="Debug"

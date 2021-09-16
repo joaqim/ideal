@@ -65,7 +65,7 @@ private:
   Containers::Pointer<Text::Renderer2D> _dynamicText;
   Text::DistanceFieldGlyphCache _cache;
 
-  FileWatcher _watcher;
+  /* FileWatcher _watcher; */
 
   Magnum::Timeline _timeline;
 
