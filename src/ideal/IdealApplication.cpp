@@ -22,7 +22,9 @@ namespace Ideal {
 /*       return "./lib/"; */
 /*     } */
 /*     return "../lib/"; */
-/*     //return std::filesystem::path(currentDir).remove_filename().append("../lib/").string(); */
+/*     //return
+ * std::filesystem::path(currentDir).remove_filename().append("../lib/").string();
+ */
 /* } */
 
 IdealApplication::IdealApplication(const Arguments &arguments)
@@ -32,22 +34,26 @@ IdealApplication::IdealApplication(const Arguments &arguments)
                                 .setWindowFlags(
                                     Configuration::WindowFlag::Resizable)},
       _cache{Vector2i{2048}, Vector2i{384}, 18} {
-      /* _watcher{Directory::path(getLibraryDir() + */
-                               /* "ImGuiStyleModule.so")} { */
+  /* _watcher{Directory::path(getLibraryDir() + */
+  /* "ImGuiStyleModule.so")} { */
 
   /* const auto libDir = getLibraryDir(); */
   /* Debug{} << "LibDir:" << libDir.c_str(); */
-  /* Directory::write(libDir+"ImGuiStyleModule_Runtime.so", Directory::read(libDir+"ImGuiStyleModule.so")); */
-#if 0
+  /* Directory::write(libDir+"ImGuiStyleModule_Runtime.so",
+   * Directory::read(libDir+"ImGuiStyleModule.so")); */
+#if 1
   /* Test Module */
   std::unique_ptr<AbstractModule> module;
-  /* Copy DLL so that the original can be overwritten with never version */
-  Directory::write("lib/ImGuiStyleModule_Runtime.so", Directory::read("lib/ImGuiStyleModule.so"));
   /* First load of the copied plugin */
-  if (!(_moduleManager.load("ImGuiStyleModule") &
-        PluginManager::LoadState::Loaded)) {
-    Error{} << "ImGuiStyleModule can not be loaded.";
+  if (!(_moduleManager.load("TestModule") & PluginManager::LoadState::Loaded)) {
+    Error{} << "TestModule can not be loaded.";
   }
+  module = _moduleManager.instantiate("TestModule");
+  module->load();
+  /* Debug{} << "Module unload:" << module->unload(false); */
+  /* module->unload(false); */
+  /* auto state{module->unload()}; */
+  /* module->load(std::move(state)); */
 #endif
 
   const auto size = Vector2{windowSize()} / dpiScaling();
@@ -57,14 +63,14 @@ IdealApplication::IdealApplication(const Arguments &arguments)
   const float dpiScaleFactor = framebufferSize().x() / size.x();
   Debug() << "DPI: " << dpiScaleFactor << "\n";
   // Utils::ImGui::setImGuiStyle(dpiScaleFactor);
- 
-  _moduleLoader.load("ImGuiStyleModule_Runtime");
+
+  _moduleLoader.load("ImGuiStyleModule");
+  /* _moduleLoader.reload("ImGuiStyleModule_Runtime"); */
   /* _moduleLoader.load("ImGuiStyleModule"); */
-  //_moduleLoader.unload("ImGuiStyleModule");
 
   //_module = _moduleManager.instantiate("ImGuiStyleModule");
   //_module->load();
-  //module->unload();
+  // module->unload();
 
   Utility::Resource rs{"assets"};
   Containers::ArrayView<const char> font =
@@ -294,6 +300,8 @@ void IdealApplication::viewportEvent(ViewportEvent &event) {
 void IdealApplication::keyPressEvent(KeyEvent &event) {
   if (_imgui.handleKeyPressEvent(event))
     return;
+  if (event.key() == KeyEvent::Key::A)
+    _moduleLoader.reload("ImGuiStyleModule");
 }
 
 void IdealApplication::keyReleaseEvent(KeyEvent &event) {

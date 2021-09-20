@@ -34,6 +34,13 @@ void impl::UpdateListener::handleFileAction(efsw::WatchID watchid,
       break;
     case efsw::Actions::Modified:
       Debug{} << "DIR (" << dir.c_str() << ") FILE (" << filename.c_str() << ") has event Modified";
+      _moveCount++;
+      if (_moveCount > 2) {
+        const std::string moduleName = Corrade::Utility::Directory::splitExtension(filename).first;
+        _pModuleLoader->reload(moduleName.c_str());
+        _moveCount = 0;
+      }
+
       break;
     case efsw::Actions::Moved:
       Debug{} << "DIR (" << dir.c_str() << ") FILE (" << filename.c_str() << ") has event Moved from (" << _oldFilename.c_str() << ")";
@@ -57,7 +64,7 @@ using namespace Corrade;
 using namespace Corrade::Utility;
 
 HotModuleLoader::HotModuleLoader() :  _moduleManager{getLibraryDir()},_updateListener{this} {};
-  
+
 HotModuleLoader::~HotModuleLoader() {
   for(auto const &watcher : _mWatchIDs) {
     unload(watcher.first.c_str());
@@ -78,7 +85,7 @@ bool HotModuleLoader::load(const char *moduleName) {
       Directory::path(Directory::current() + "/lib/" + moduleName + ".so").c_str(),
 #else
       /* Directory::path(Directory::current() + "/lib/").c_str(), */
-       getLibraryDir().c_str(),
+      getLibraryDir().c_str(),
 #endif
       &_updateListener,
       false);
@@ -100,15 +107,16 @@ bool HotModuleLoader::reload(const char *moduleName) {
     moduleName = _lastModuleName.c_str();
   }
 
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
   _mpModules.at(moduleName)->unload();
   _mpModules.at(moduleName).reset(nullptr);
+  _mpModules.erase(moduleName);
   if (_moduleManager.unload(moduleName) &
       PluginManager::LoadState::UnloadFailed) {
     Error{} << "Module:" << moduleName << "failed to unload.";
     return false;
   }
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
   if (!(_moduleManager.load(moduleName) & PluginManager::LoadState::Loaded)) {
     Error{} << "Module: " << moduleName << " can not be loaded.";
@@ -117,7 +125,7 @@ bool HotModuleLoader::reload(const char *moduleName) {
 
 
   _mpModules.try_emplace(moduleName, _moduleManager.instantiate(moduleName));
-  //_mpModules.at(moduleName)->load();
+  _mpModules.at(moduleName)->load();
   _lastModuleName = moduleName;
 
 
@@ -130,6 +138,7 @@ bool HotModuleLoader::unload(const char *moduleName) {
   }
   _mpModules.at(moduleName)->unload();
   _mpModules.at(moduleName).reset(nullptr);
+  _mpModules.erase(moduleName);
 
   _fileWatcher.removeWatch(_mWatchIDs.at(moduleName));
   _mWatchIDs.erase(moduleName);

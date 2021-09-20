@@ -29,6 +29,11 @@ namespace Ideal {
 
   using namespace Corrade::Utility;
 
+  struct HotModule {
+    const char* name;
+    std::unique_ptr<AbstractModule> code;
+  };
+
   class HotModuleLoader : AbstractModuleLoader {
     public:
       HotModuleLoader();
