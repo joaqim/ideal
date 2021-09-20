@@ -17,15 +17,20 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 # Modules
 
+set(MODULES_SRCS TestModule.cpp modules/ImGuiStyleModule.cpp modules/GameModule.cpp)
+foreach(MOD_SRC IN LISTS MODULES_SRCS)
+  get_filename_component(MOD_NAME ${MOD_SRC} NAME_WE)
+  corrade_add_plugin(${MOD_NAME} ${CMAKE_CURRENT_BINARY_DIR} "" "" ${MOD_SRC})
+  set_target_properties(${MOD_NAME} PROPERTIES COMPILE_FLAGS "-Wno-return-local-addr")
+  set(MODULE_DEPS Corrade::PluginManager Corrade::Utility)
 
-corrade_add_plugin(TestModule ${CMAKE_CURRENT_BINARY_DIR} "" "" TestModule.cpp)
-set_target_properties(TestModule PROPERTIES COMPILE_FLAGS "-Wno-return-local-addr")
-target_link_libraries(TestModule Corrade::PluginManager Corrade::Utility)
-
-corrade_add_plugin(ImGuiStyleModule ${CMAKE_CURRENT_BINARY_DIR} "" "" modules/ImGuiStyleModule.cpp)
-set_target_properties(ImGuiStyleModule PROPERTIES COMPILE_FLAGS "-Wno-return-local-addr")
-target_link_libraries(ImGuiStyleModule Corrade::PluginManager Corrade::Utility MagnumIntegration::ImGui)
-
+  # set(IMGUI_DEP off)
+  string(COMPARE EQUAL ${MOD_NAME} "ImGuiStyleModule" IMGUI_DEP)
+  if(IMGUI_DEP)
+    list(APPEND MODULE_DEPS MagnumIntegration::ImGui)
+  endif()
+  target_link_libraries(${MOD_NAME} ${MODULE_DEPS})
+endforeach()
 
 find_package(
   Magnum REQUIRED
